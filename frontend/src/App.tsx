@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 type Role = 'JOB_SEEKER' | 'COMPANY';
