@@ -106,7 +106,10 @@ app.get('/api/jobs', asyncHandler(async (req, res) => {
 
 app.get('/api/jobs/:id', asyncHandler(async (req, res) => {
   const job = await prisma.job.findFirst({
-    where: { id: req.params.id, isActive: true },
+    where: {
+  id: String(req.params.id),
+  isActive: true,
+},
     include: { company: { select: { id: true, name: true, companyName: true } } }
   });
   if (!job) return res.status(404).json({ message: 'Job not found' });
@@ -130,7 +133,12 @@ app.get('/api/company/jobs', auth, role(Role.COMPANY), asyncHandler(async (req, 
 
 app.post('/api/jobs/:id/applications', auth, role(Role.JOB_SEEKER), asyncHandler(async (req, res) => {
   const data = applySchema.parse(req.body);
-  const job = await prisma.job.findFirst({ where: { id: req.params.id, isActive: true } });
+  const job = await prisma.job.findFirst({
+  where: {
+    id: String(req.params.id),
+    isActive: true,
+  },
+});
   if (!job) return res.status(404).json({ message: 'Job not found or no longer active' });
   try {
     const application = await prisma.application.create({
@@ -161,7 +169,12 @@ app.get('/api/applications/me', auth, role(Role.JOB_SEEKER), asyncHandler(async 
 }));
 
 app.get('/api/company/jobs/:jobId/applications', auth, role(Role.COMPANY), asyncHandler(async (req, res) => {
-  const job = await prisma.job.findFirst({ where: { id: req.params.jobId, companyId: req.user!.id } });
+  const job = await prisma.job.findFirst({
+  where: {
+    id: String(req.params.jobId),
+    companyId: req.user!.id,
+  },
+});
   if (!job) return res.status(404).json({ message: 'Job not found or access denied' });
   const applications = await prisma.application.findMany({
     where: { jobId: job.id },
@@ -177,7 +190,10 @@ app.get('/api/company/jobs/:jobId/applications', auth, role(Role.COMPANY), async
 app.patch('/api/company/applications/:id/status', auth, role(Role.COMPANY), asyncHandler(async (req, res) => {
   const data = statusSchema.parse(req.body);
   const application = await prisma.application.findFirst({
-    where: { id: req.params.id, job: { companyId: req.user!.id } }
+    where: {
+  id: String(req.params.id),
+  job: { companyId: req.user!.id },
+}
   });
   if (!application) return res.status(404).json({ message: 'Application not found or access denied' });
   if (application.status === data.status) return res.status(400).json({ message: 'Application already has that status' });
